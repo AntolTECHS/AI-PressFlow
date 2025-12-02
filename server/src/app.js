@@ -6,9 +6,8 @@ import morgan from "morgan";
 // Existing routes
 import articleRoutes from "./routes/articleRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
-
-// New ingestion route
 import ingestRoutes from "./routes/ingestRoutes.js";
+import editorRoutes from "./routes/editorRoutes.js"; // Editorial routes
 
 const app = express();
 
@@ -20,9 +19,8 @@ app.use(morgan("dev"));
 // Routes
 app.use("/api/articles", articleRoutes);
 app.use("/api/users", userRoutes);
-
-// NEW: ingestion API
 app.use("/api/ingest", ingestRoutes);
+app.use("/api/editor", editorRoutes); // NEW: editorial dashboard
 
 // Default Route
 app.get("/", (req, res) => {
