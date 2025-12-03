@@ -9,6 +9,7 @@ function Register() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -24,11 +25,10 @@ function Register() {
     }
 
     try {
-      await register(name, email, password);
+      await register(name.trim(), email.trim().toLowerCase(), password);
       navigate('/');
     } catch (err) {
-      setError('Registration failed. Email may already be in use.');
-      console.error(err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
