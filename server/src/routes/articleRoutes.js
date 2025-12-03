@@ -19,14 +19,22 @@ const router = express.Router();
 /* ----------------------------------------------
    PUBLIC ROUTES
 ----------------------------------------------*/
-
 router.get("/", getAllArticles); // published only
-router.get("/:id", getArticleById);
-
 
 /* ----------------------------------------------
    JOURNALIST ROUTES
 ----------------------------------------------*/
+
+// fetch own articles — must come BEFORE /:id
+router.get(
+  "/mine",
+  protect,
+  authorize("journalist", "editor", "admin"),
+  getMyArticles
+);
+
+// fetch single article by ID
+router.get("/:id", getArticleById);
 
 // create
 router.post(
@@ -36,15 +44,7 @@ router.post(
   createArticle
 );
 
-// fetch own
-router.get(
-  "/mine/all",
-  protect,
-  authorize("journalist", "editor", "admin"),
-  getMyArticles
-);
-
-// edit own
+// edit own articles
 router.put(
   "/:id",
   protect,
@@ -52,12 +52,11 @@ router.put(
   updateArticle
 );
 
-
 /* ----------------------------------------------
    EDITOR ROUTES
 ----------------------------------------------*/
 
-// list pending
+// list pending articles
 router.get(
   "/review/pending/list",
   protect,
@@ -65,7 +64,7 @@ router.get(
   getPendingArticles
 );
 
-// approve
+// approve an article
 router.put(
   "/:id/approve",
   protect,
@@ -73,7 +72,7 @@ router.put(
   approveArticle
 );
 
-// reject
+// reject an article
 router.put(
   "/:id/reject",
   protect,
@@ -81,12 +80,11 @@ router.put(
   rejectArticle
 );
 
-
 /* ----------------------------------------------
    ADMIN ROUTES
 ----------------------------------------------*/
 
-// publish
+// publish an article
 router.put(
   "/:id/publish",
   protect,
@@ -94,7 +92,7 @@ router.put(
   publishArticle
 );
 
-// delete
+// delete an article
 router.delete(
   "/:id",
   protect,

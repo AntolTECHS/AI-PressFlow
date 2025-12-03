@@ -1,7 +1,7 @@
-// src/pages/MyArticles.jsx
 import { useEffect, useState } from 'react';
 import { articlesAPI } from "../../services/api";
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Pencil, CheckCircle, XCircle } from 'lucide-react';
+import { Link } from "react-router-dom";
 
 function MyArticles() {
   const [articles, setArticles] = useState([]);
@@ -11,7 +11,8 @@ function MyArticles() {
     const load = async () => {
       try {
         const res = await articlesAPI.getMine();
-        setArticles(res.data);
+        const myArticles = Array.isArray(res.data) ? res.data : [];
+        setArticles(myArticles);
       } catch (err) {
         console.error(err);
         setError('Failed to load your articles.');
@@ -37,14 +38,34 @@ function MyArticles() {
         ) : (
           <div className="space-y-4">
             {articles.map((article) => (
-              <div
-                key={article.id}
-                className="p-4 bg-white rounded shadow hover:shadow-lg transition"
-              >
-                <h2 className="text-2xl font-semibold">{article.title}</h2>
-                <p className="text-gray-600 mt-2">
-                  Status: <strong>{article.status}</strong>
-                </p>
+              <div key={article._id} className="p-4 bg-white rounded shadow hover:shadow-lg transition">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h2 className="text-2xl font-semibold">{article.title}</h2>
+                    <p className="text-gray-600 mt-1">
+                      Status: <strong>{article.status}</strong>
+                    </p>
+
+                    {article.status === "rejected" && article.rejectionReason && (
+                      <p className="text-red-600 text-sm mt-1">
+                        Reason: {article.rejectionReason}
+                      </p>
+                    )}
+
+                    {article.summary && (
+                      <p className="text-gray-700 mt-3 line-clamp-3">{article.summary}</p>
+                    )}
+                  </div>
+
+                  <Link to={`/journalist/edit/${article._id}`} className="flex items-center text-blue-600 hover:underline">
+                    <Pencil className="w-4 h-4 mr-1" /> Edit
+                  </Link>
+                </div>
+
+                <div className="mt-3 flex space-x-2">
+                  {article.status === "approved" && <CheckCircle className="w-5 h-5 text-green-600" />}
+                  {article.status === "rejected" && <XCircle className="w-5 h-5 text-red-600" />}
+                </div>
               </div>
             ))}
           </div>

@@ -1,27 +1,24 @@
-import axios from 'axios';
+// src/services/api.js
+import axios from "axios";
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: "http://localhost:5000/api", // must match your backend
 });
 
+// Automatically attach token
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  const token = localStorage.getItem("token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
 export const articlesAPI = {
-  getAll: () => api.get('/articles'),
+  getAll: () => api.get("/articles"),          // public published articles
   getById: (id) => api.get(`/articles/${id}`),
-};
-
-export const editorAPI = {
-  getStagedArticles: () => api.get('/editor/staged'),
-  approveArticle: (id) => api.post(`/editor/approve/${id}`),
-  rejectArticle: (id) => api.post(`/editor/reject/${id}`),
-  updateArticle: (id, data) => api.put(`/editor/articles/${id}`, data),
+  getMine: () => api.get("/articles/mine"),   // logged-in journalist
+  create: (data) => api.post("/articles", data),
+  updateArticle: (id, data) => api.put(`/articles/${id}`, data),
+  deleteArticle: (id) => api.delete(`/articles/${id}`),
 };
 
 export default api;

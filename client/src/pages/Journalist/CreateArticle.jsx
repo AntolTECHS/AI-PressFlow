@@ -1,4 +1,4 @@
-// src/pages/CreateArticle.jsx
+// src/pages/Journalist/CreateArticle.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { articlesAPI } from "../../services/api";
@@ -19,7 +19,7 @@ function CreateArticle() {
 
     try {
       await articlesAPI.create({ title, content });
-      navigate('/editor/my-articles');
+      navigate('/journalist/my-articles'); // ✔ fixed path
     } catch (error) {
       console.error(error);
       setError('Failed to create article.');
