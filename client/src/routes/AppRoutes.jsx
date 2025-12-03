@@ -1,113 +1,131 @@
-import { Routes, Route } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
-import ProtectedRoute from '../components/ProtectedRoute';
-import ResponsiveNestedSidebar from '../components/ResponsiveNestedSidebar';
-import { useAuth } from '../context/AuthContext'; // example: your auth context
+import { Routes, Route } from "react-router-dom";
+import ProtectedRoute from "../components/ProtectedRoute";
+import { useAuth } from "../context/AuthContext";
+
+// Layout
+import DashboardLayout from "../layouts/DashboardLayout";
 
 // Public Pages
-import Home from '../pages/Home';
-import ArticleDetail from '../pages/ArticleDetail';
-import Login from '../pages/Login';
-import Register from '../pages/Register';
+import Home from "../pages/Home";
+import ArticleDetail from "../pages/ArticleDetail";
+import Login from "../pages/Login";
+import Register from "../pages/Register";
 
 // Journalist Pages
-import JournalistDashboard from '../pages/Journalist/JournalistDashboard';
-import MyArticles from '../pages/Journalist/MyArticles';
-import CreateArticle from '../pages/Journalist/CreateArticle';
+import JournalistDashboard from "../pages/Journalist/JournalistDashboard";
+import MyArticles from "../pages/Journalist/MyArticles";
+import CreateArticle from "../pages/Journalist/CreateArticle";
 
 // Editor Pages
-import EditorDashboard from '../pages/Editor/EditorDashboard';
-import ReviewArticles from '../pages/Editor/ReviewArticles';
+import EditorDashboard from "../pages/Editor/EditorDashboard";
+import ReviewArticles from "../pages/Editor/ReviewArticles";
 
 // Admin Pages
-import AdminPublishPanel from '../pages/Admin/AdminPublishPanel';
-import AdminUsersPanel from '../pages/Admin/AdminUsersPanel';
+import AdminPublishPanel from "../pages/Admin/AdminPublishPanel";
+import AdminUsersPanel from "../pages/Admin/AdminUsersPanel";
 
 function AppRoutes() {
-  const { user } = useAuth(); // user.role should exist
+  const { user } = useAuth();
 
   return (
-    <div className="flex min-h-screen">
-      {/* Show ResponsiveNestedSidebar only for logged-in users */}
-      {user && <ResponsiveNestedSidebar role={user.role} />}
+    <Routes>
+      {/* Homepage */}
+      <Route
+        path="/"
+        element={
+          user ? (
+            <DashboardLayout>
+              <Home />
+            </DashboardLayout>
+          ) : (
+            <Home />
+          )
+        }
+      />
 
-      <div className="flex-1 flex flex-col md:ml-64">
-        <Navbar />
-        <main className="flex-1">
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/article/:id" element={<ArticleDetail />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+      {/* Article Details (public) */}
+      <Route path="/article/:id" element={<Home />} />
 
-            {/* Journalist Routes */}
-            <Route
-              path="/journalist"
-              element={
-                <ProtectedRoute requiredRole={['journalist', 'admin']}>
-                  <JournalistDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/journalist/my-articles"
-              element={
-                <ProtectedRoute requiredRole={['journalist', 'admin']}>
-                  <MyArticles />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/journalist/create-article"
-              element={
-                <ProtectedRoute requiredRole={['journalist', 'admin']}>
-                  <CreateArticle />
-                </ProtectedRoute>
-              }
-            />
+      {/* Login / Register */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
-            {/* Editor Routes */}
-            <Route
-              path="/editor"
-              element={
-                <ProtectedRoute requiredRole={['editor', 'admin']}>
-                  <EditorDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/editor/review-articles"
-              element={
-                <ProtectedRoute requiredRole={['editor', 'admin']}>
-                  <ReviewArticles />
-                </ProtectedRoute>
-              }
-            />
+      {/* Journalist Routes */}
+      <Route
+        path="/journalist"
+        element={
+          <ProtectedRoute requiredRole={["journalist", "admin"]}>
+            <DashboardLayout>
+              <JournalistDashboard />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/journalist/my-articles"
+        element={
+          <ProtectedRoute requiredRole={["journalist", "admin"]}>
+            <DashboardLayout>
+              <MyArticles />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/journalist/create-article"
+        element={
+          <ProtectedRoute requiredRole={["journalist", "admin"]}>
+            <DashboardLayout>
+              <CreateArticle />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
 
-            {/* Admin Routes */}
-            <Route
-              path="/admin/publish"
-              element={
-                <ProtectedRoute requiredRole={['admin']}>
-                  <AdminPublishPanel />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/users"
-              element={
-                <ProtectedRoute requiredRole={['admin']}>
-                  <AdminUsersPanel />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
-    </div>
+      {/* Editor Routes */}
+      <Route
+        path="/editor"
+        element={
+          <ProtectedRoute requiredRole={["editor", "admin"]}>
+            <DashboardLayout>
+              <EditorDashboard />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/editor/review-articles"
+        element={
+          <ProtectedRoute requiredRole={["editor", "admin"]}>
+            <DashboardLayout>
+              <ReviewArticles />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Admin Routes */}
+      <Route
+        path="/admin/publish"
+        element={
+          <ProtectedRoute requiredRole={["admin"]}>
+            <DashboardLayout>
+              <AdminPublishPanel />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <ProtectedRoute requiredRole={["admin"]}>
+            <DashboardLayout>
+              <AdminUsersPanel />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
   );
 }
 
