@@ -141,4 +141,25 @@ dist
 # SvelteKit build / generate output
 .svelte-kit
 
+###################################
+# GLOBAL ENVIRONMENT FILE PROTECTION
+###################################
+
+# Ignore all .env files everywhere in the project
+.env
+*.env
+*/.env
+**/.env
+
+# Ignore environment folders if you create any
+env/
+env/**
+
+# Ignore config secrets
+config/*.env
+config/**/.env
+server/.env
+client/.env
+
+
 # End of https://www.toptal.com/developers/gitignore/api/node
