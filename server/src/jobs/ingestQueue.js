@@ -1,7 +1,7 @@
 // src/jobs/ingestQueue.js
 import { Queue, Worker } from "bullmq";
 import IORedis from "ioredis";
-import { scrapeUrl } from "../services/scraperService.js";
+import { extractArticle } from "../utils/extractArticle.js";   // ⬅ REPLACED
 import Article from "../models/Article.js";
 import { cleanText, contentHash } from "../utils/textCleaner.js";
 import { categorizeText } from "../services/nlpService.js";
@@ -41,36 +41,50 @@ export function startIngestWorker() {
     async (job) => {
       const payload = job.data;
       const url = payload.link || payload.originalUrl;
+
       if (!url) throw new Error("No URL in payload");
 
-      // Scrape
-      const scraped = await scrapeUrl(url).catch(() => null);
+      // ⬇️ NEW ADVANCED EXTRACTION
+      const extracted = await extractArticle(url);
 
-      const title = (payload.title || scraped?.title || "").trim();
-      const rawContent = (scraped?.content || payload.content || "").trim();
+      if (extracted.error) {
+        console.error("Extraction failed:", url, extracted.message);
+        return { failed: true };
+      }
+
+      // --- TITLE ---
+      const title = cleanText(
+        payload.title || extracted.title || ""
+      );
+
+      // --- CONTENT ---
+      const rawContent = extracted.textContent || payload.content || "";
       const content = cleanText(rawContent);
 
-      const summary = scraped?.summary ||
+      // --- SUMMARY ---
+      const summary =
+        extracted.summary ||
         (content.length > 500 ? content.slice(0, 500) : content.slice(0, 200));
 
-      const images = scraped?.images || payload.images || [];
+      // --- IMAGES ---
+      const images = extracted.images || payload.images || [];
 
-      // Duplicate detection
+      // --- DUPLICATE DETECTION ---
       const hash = contentHash(content || title);
       const existing = await Article.findOne({
         $or: [{ originalUrl: url }, { contentHash: hash }]
       }).lean();
 
       if (existing) {
-        console.info("Duplicate detected, skipping:", url);
+        console.info("Duplicate detected → skipping:", url);
         return { skipped: true, existingId: existing._id };
       }
 
-      // NLP Category
+      // --- CATEGORY (NLP) ---
       let category = await categorizeText(content);
       if (!category) category = "misc";
 
-      // Save staged article
+      // --- SAVE ---
       const doc = new Article({
         title,
         summary,
@@ -91,14 +105,19 @@ export function startIngestWorker() {
     },
     {
       connection,
-      concurrency: 5,           // NEW
-      timeout: 20000,           // NEW
-      lockDuration: 30000       // NEW
+      concurrency: 5,
+      timeout: 20000,
+      lockDuration: 30000
     }
   );
 
-  worker.on("completed", (job) => console.log("Ingest job completed:", job.id));
-  worker.on("failed", (job, err) => console.error("Job failed:", job?.id, err?.message || err));
+  worker.on("completed", (job) =>
+    console.log("Ingest job completed:", job.id)
+  );
+
+  worker.on("failed", (job, err) =>
+    console.error("Job failed:", job?.id, err?.message || err)
+  );
 
   console.log("Ingest worker started with concurrency = 5");
   return worker;
